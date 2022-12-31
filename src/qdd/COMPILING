@@ -1,0 +1,74 @@
+COMPILING
+=========
+
+If you wish to contact me, send an E-mail to: ian.chapman@amiga-hardware.com
+
+Patches & ports are welcome :-)
+
+It is recommended you also read the README.
+
+1. Compiling on Linux
+2. Compiling on Solaris
+3. Compiling on IRIX
+
+
+1. Compiling on Linux
+---------------------
+
+Qdd has only been compiled on X86 Linux with the 2.6.X series of kernels using
+gcc 3.3.3. It'll probably work on other setups, feel free to try:
+
+a. Open the file called "config.h" in a text editor.
+b. Uncomment the the linux define. (ie remove // from the line)
+c. Ensure the Solaris and IRIX defines are still commented out.
+d. Save the file
+e. Type:
+   gcc -o qdd qdd.c
+
+If all goes well, you should end up with a binary file called qdd. You can
+generally ignore compiler warnings for the moment.
+
+Please read the file config.h for other options which may be configured.
+
+
+2. Compiling on Solaris
+-----------------------
+
+Qdd has only been compiled on Solaris/SPARC using gcc 3.3.2. It'll probably
+work on many other setups, feel free to try:
+
+a. Open the file called "config.h" in a text editor.
+b. Uncomment the solaris define. (ie remove // from the line)
+c. Ensure the Linux and IRIX defines are still commented out.
+d. Save the file
+e. Type:
+    gcc -o qdd qdd.c -lsocket
+
+If all goes well, you should end up with a binary file called qdd. You can
+generally ignore compiler warnings for the moment.
+
+Please read the file config.h for other options which may be configured.
+
+
+3. Compiling on IRIX
+--------------------
+
+Note: Use of qdd on IRIX is not recommended at the moment.
+
+Qdd has only been compiled on IRIX 6.5.16 using gcc 3.3. It'll probably
+work on many other setups, feel free to try:
+
+a. Open the file called "config.h" in a text editor.
+b. Uncomment the IRIX define. (ie remove // from the line)
+c. Ensure the Linux and Solaris defines are still commented out.
+d. Save the file.
+e. Type:
+    gcc -o qdd qdd.c
+
+If all goes well, you should end up with a binary file called qdd. You can
+generally ignore compiler warnings for the moment.
+
+Please read the file config.h for other options which may be configured
+
+
+

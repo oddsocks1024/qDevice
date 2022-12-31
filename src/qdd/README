@@ -1,0 +1,132 @@
+Qdd 0.5 (Q-Device Daemon 0.5)
+=============================
+
+Contact: ian.chapman@amiga-hardware.com
+
+Please make sure you read this document in full before attempting to use qdd.
+
+1. INTRODUCTION
+2. WARNINGS (READ IT)
+3. COMPILING
+4. USAGE
+5. Linux Notes
+6. Solaris Notes
+7. IRIX Notes
+
+
+1. INTRODUCTION
+---------------
+
+Qdd is a small daemon which executes SCSI commands sent from Q-Device on the
+local machine and sends back the reply to Q-Device for processing. Q-Device
+communicates with qdd by using the pseudo device, tcpip-scsi.device.
+
+Qdd was largely developed to give me access to more SCSI devices for further
+development of Q-Device. Consequently it is not feature-full and will simply
+quit at the slightest hiccup. However it's been released as some may find it
+useful or interesting.
+
+
+2. WARNINGS
+-----------
+
+I don't want to discourage you from trying out qdd, but it's only fair to
+point out the following:
+
+    a. This program was written with little regard to security. Therefore you
+    should only consider running it on a private network. That is, a network
+    which you, and only you use.
+
+    b. Qdd by default uses UDP ports 8000 up to a maximum of 8030. The actual
+    ports in use depends on the number of SCSI devices in the machine, but it's
+    almost certainly going to be far less than this. You may wish to configure
+    your firewall to accept UDP only, and only from your Amiga running Q-Device
+    for ports 8000 to 8030 for extra security.
+
+    c. There is no negotiation between Q-Device and the daemon. The daemon
+    assumes that anything arriving on one of it's ports is a SCSI command. It
+    attempts to take some precautions for this. All SCSI commands supported by
+    Q-Device are 6, 10 or 12 bytes. If a packet arrives which does not match
+    these sizes then qdd will automatically quit.
+
+    d. Because of point c, there is a possibility albeit extremely low that a
+    packet arrives which happens to be 6, 10 or 12 bytes and by chance happens
+    to be a valid SCSI command, therefore there is the potential to damage the
+    hard disks. The chances of this happening by accident are extemely low, but
+    the possibility is there.
+
+    e. NEVER NEVER NEVER attempt to connect to qdd with anything other than
+    Q-Device.
+
+    f. Only connect to qdd with the matching Q-Device. That is only use
+    Q-Device V0.5 with qdd V0.5 etc.
+
+Use of qdd and Q-Device is entirely and wholly at your own risk. You accept in
+full, responsibility for any and all consequences as a result of their use.
+
+
+3. COMPILING
+------------
+
+Please see the text file COMPILING
+
+
+4. USAGE
+--------
+
+For qdd to be effective it should probably run with root priviledges. You
+normally just type:-
+
+./qdd
+
+from the command line. It will then scan for devices it knows how to look for
+and setup a listening port for each device. Then use Q-Device with the
+tcpip-scsi.device as normal. Note: Make sure that the preferences for
+tcpip-scsi.device are configured with a base port of 8000 and the hostname or
+IP address of the machine running qdd.
+
+To quit qdd, use CTRL-C or use kill <pid>, where <pid> is the process ID
+obtained from using the ps command.
+
+Please consult the platform specific notes.
+
+
+5. LINUX Notes
+--------------
+
+Qdd has only been tested on 32bit X86 Linux with the 2.6.x series of kernels.
+It'll probably work on any Linux running kernel 2.4.x and above with any
+architecture, provided it's compiled as a 32bit binary. The provided binary
+was compiled with gcc 3.3.3
+
+It looks for devices using the SCSI generic interface, therefore it tries to
+open the following devices:
+
+/dev/sg0 through to /dev/sg30
+
+
+6. SOLARIS Notes
+----------------
+
+Qdd has only been tested on Solaris/SPARC version 9. It'll probably work on
+earlier versions of Solaris from 6 upwards. It'll probably also work on
+Solaris/X86 and Solaris/PPC provided it's compiled as a 32bit binary.
+Apparently Solaris/X86 treats IDE devices as SCSI, so qdd may use these.
+
+Qdd on Solaris uses the USCSI interface. By default it attempts to look for
+the first 8 devices on the first SCSI controller only. For example:
+
+/dev/rdsk/c0t0d0s0 through to /dev/rdsk/c0t7d0s0
+
+The USCSI interface only supports hard disks and tape drives, therefore other
+devices such as CDROMs may not be available for use with qdd.
+
+Unlike the Linux version, the Solaris version will quit if a SCSI command
+is sent to a device which it doesn't understand.
+
+
+7. IRIX Notes
+-------------
+
+Although there is support for IRIX at the moment and it even compiles, it
+doesn't behave properly and so is not recommended for use yet.

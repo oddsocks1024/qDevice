@@ -1,0 +1,49 @@
+;
+; Simple Shell Script for Compiling Q-Device
+;
+; Requires EC in your command path and this script
+; must be executed in the root of the Q-Device
+; source directory.
+
+echo 'Compiling SCSI Opcodes (scsi/opcodes.m)'
+ec scsi/opcodes QUIET
+
+echo 'Compiling SCSI Parameters (scsi/params.m)'
+ec scsi/params QUIET
+
+echo 'Compiling SCSI headers (scsi/headers.m)'
+ec scsi/headers QUIET
+
+echo 'Compiling Listview printing procedures (listview/outlist.m)'
+ec listview/outlist QUIET
+
+echo 'Compiling Inquiry Handlers (handlers/inquiry.m)'
+ec handlers/inquiry QUIET
+
+echo 'Compiling Capacity Handlers (handlers/capacity.m)'
+ec handlers/capacity QUIET
+
+echo 'Compiling Defects Handlers (handlers/defects.m)'
+ec handlers/defects QUIET
+
+echo 'Compiling TOC Handlers (handlers/toc.m)'
+ec handlers/toc QUIET
+
+echo 'Compiling ATIP Handlers (handlers/atip.m)'
+ec handlers/atip QUIET
+
+echo 'Compiling Sense Handlers (handlers/sense.m)'
+ec handlers/sense QUIET
+
+echo 'Compiling Mode Sense Handlers (handlers/modesense.m)'
+ec handlers/modesense LARGE QUIET
+
+echo 'Compiling Log Handlers (handlers/logs.m')
+ec handlers/logs QUIET
+
+echo 'Compiling Q-Device Executable'
+ec q-device large QUIET
+
+
+
+

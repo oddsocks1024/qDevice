@@ -1,0 +1,1875 @@
+@database Q-Device!.guide
+@Width 80
+@AUTHOR Ian Chapman
+@$VER: Q-Device_Guide V0.6
+
+
+@node main "Q-Device!.guide"
+
+                                 Q-Device! V.06
+
+                  Ian Chapman <ian.chapman@amiga-hardware.com>
+                         http://software.amiga-hardware.com
+
+    Q-Device! may be more helpful if you consult the SCSI-2 documention for
+          additional information and terminology. (http://www.t10.org)
+
+                            @{" Disclaimer            " Link "Disclaimer"}
+                            @{" Introduction          " Link "Introduction"}
+
+                            @{" SCSI Devices          " Link "SCSI Devices"}
+                            @{" IDE Devices           " Link "IDE Devices"}
+                            @{" USB Devices           " Link "USB Devices"}
+                            @{" ST506/ESDI Targets etc" Link "Other Devices"}
+
+                            @{" Main Window           " Link "Main Window"}
+
+                              @{b}Query@{ub}
+                              @{" Probe Devices     " Link "Probe Devices"}
+                              @{" Full Inquiry      " Link "Full Inquiry"}
+                              @{" Capacity          " Link "Capacity"}
+                              @{" Test Ready        " Link "Test Ready"}
+                              @{" Device Parameters " Link "Device Parameters"}
+                              @{" Show Firmware Logs" Link "Show Firmware Logs"}
+                              @{" Serial #          " Link "Serial #"}
+                              @{" Read TOC          " Link "Read TOC"}
+                              @{" ATIP              " Link "ATIP"}
+                              
+
+                              @{b}Control@{ub}
+                              @{" Power Up          " Link "Power Up"}
+                              @{" Power Down        " Link "Power Down"}
+                              @{" Lock              " Link "Lock"}
+                              @{" UnLock            " Link "UnLock"}
+                              @{" Insert            " Link "Insert"}
+                              @{" Eject             " Link "Eject"}
+                              @{" Rewind/Rezero     " Link "Rewind"}
+
+                              @{b}Diagnostic@{ub}
+                              @{" Start Self Test   " Link "Start Self Test"}
+                              @{" Show Defects      " Link "Show Defects"}
+                              
+                              @{b}Misc@{ub}
+                              @{" tcpip-scsi.device " Link "Daemon"}
+
+                            @{" Save Output           " Link "Save Output"}
+                            @{" Preferences           " Link "Preferences"}
+
+                            @{" FAQ                   " Link "FAQ"}
+                            @{" Known Bugs            " Link "Known Bugs"}
+                            @{" History               " Link "History"}
+                            @{" Contact & Bug Reports " Link "Contact"}
+
+@endnode
+
+@node "SCSI Devices" "SCSI Devices"
+
+                                  SCSI DEVICES
+                                  ============
+
+Q-Device! is primarily intended for SCSI devices and was written using
+information mainly from the SCSI-2 specifications but also many other sources.
+It should however perform well with SCSI-1 and SCSI-3 devices. Providing the
+driver for your controller supports SCSI-Direct (almost all do) then all of
+the functionality of Q-Device! will be available to you.
+
+Please note: Due to a querk on Commodore's part, the device driver
+'scsi.device' usually (but not always) controls an IDE bus. For example, this
+applies to the internal IDE controller of the A600, A1200, A4000 and A4000T as
+well as several third party IDE cards.
+
+
+@endnode
+
+@node "IDE Devices" "IDE Devices"
+
+                                  IDE DEVICES
+                                  ===========
+
+Although Q-Device! was primarily written for SCSI devices using the SCSI-2
+specification, it does not make it useless for IDE Devices. Most drivers for
+IDE Controllers support SCSI-Direct which in turn provides a layer of emulation
+for SCSI commands. However most IDE drivers do not emulate the more advanced
+features of SCSI, only the basic queries such as an Inquiry, or the eject
+command. You should also be aware that the values reported are largely due to
+the SCSI emulation of the driver, and may indeed vary if you were to move the
+device to a different IDE controller. You may also find that using the ATAPI
+driver for the controller may improve the quality of the SCSI emulation,
+particularly with ATAPI devices.
+
+Please note: Due to a querk on Commodore's part, the device driver
+'scsi.device' usually (but not always) controls an IDE bus. For example, this
+applies to the internal IDE controller of the A600, A1200, A4000 and A4000T as
+well as several third party IDE cards.
+
+@endnode
+
+@node "USB Devices" "USB Devices"
+
+                                  USB DEVICES
+                                  ===========
+
+Q-Device! was primarily witten for SCSI devices using the SCSI-2 specifcation.
+You may be able to use it with USB Mass Storage device drivers, but initial
+reports show that the supported commands are very limited, primarily only the
+inquiry command seems to work.
+
+@endnode
+
+@node "Other Devices" "Other Devices"
+
+                                 OTHER DEVICES
+                                 =============
+
+In the days before SCSI and IDE emerged as the two standards for storage
+devices (generally speaking), many other proprietary formats existed including
+ST412, ST506, XT and Mitsumi/Panasonic/Sony CD Controllers. There are
+controllers available for the Amiga which support these sorts of devices. How
+well Q-Device! will work with them is largely unknown. Q-Device! requires the
+driver to support SCSI-Direct and because most of these devices are old
+(VERY OLD) this may not be the case.
+
+@endnode
+
+@node "Disclaimer" "Disclaimer"
+
+                                   DISCLAIMER
+                                   ==========
+
+Use of this software is entirely at your own risk. You accept any consequences
+whatsoever as a result of using this software, whether intentional, accidental,
+or as a result from a defect in the software. This includes, but is not limited
+to, damage to hardware, software or legal actions taken as a direct or indirect
+result of using this software. There is no warranty, either expressed or
+implied.
+
+It is always prudent to maintain recent backups of your system, particularly
+when dealing with software that makes use of the device drivers.
+
+@endnode
+
+@node "Introduction" "Introduction"
+
+                                  INTRODUCTION
+                                  ============
+
+Q-Device! is a tool for querying, controlling and performing diagnostic
+operations on SCSI and IDE devices. Although it was primarily written for SCSI
+devices, many of the options also work with IDE devices depending on their
+driver implementation. Q-Device! can provide you with quite a wealth of
+information about your devices.
+
+Features
+--------
+
+* Graphical User Interface (MUI)
+* Device Probing
+* Device Inquiry including:
+  Product, Vendor, Revision, Type, RMB Info, ISO, ECMA and ANSI versions, AENC,
+  TrmIOP, Relative Addressing, Bus Width, Synchronous, Linked, Command Queuing
+  and Reset Type
+* Device Capacity including:
+  Number of Blocks, Block Size, True Capacity and Vendor Capacity
+* Product Serial Number
+* Media Ejecting
+* Media Inserting
+* Device Power Down
+* Device Power Up
+* Device Media Locking
+* Device Media Unlocking
+* Device Rewind/Rezero
+* Test for unit readiness
+* Read CD Table of Cotents including:
+  Starting Track, Ending Track, Track Type, Track Copyright, Audio Channels,
+  Audio Emphasis
+* Diagnostic Tests: Simple 1 & 2, Deep 1 & 2
+* Display Media Defects
+* Device Parameter Pages (54 supported pages)
+* Firmware Logs (33 recognised logs, Support for decoding 13)
+* Basic ATIP support
+* "Experimental" Remote querying of SCSI devices running on Linux or Solaris machines.
+* Save output to a file
+
+@endnode
+
+@node "Main Window" "Main Window"
+
+                                  MAIN WINDOW
+                                  ===========
+
+@{b}Driver@{ub}
+------
+
+The name of the device driver to use, whether present in DEVS: or in ROM. For
+example @{i}scsi.device@{ui} or @{i}gvpscsi.device@{ui}. tcpip-scsi.device is
+a special pseudo driver, described elsewhere in this documentation.
+
+@{b}Unit@{ub}
+----
+
+The AmigaDOS unit number to which commands will be sent. This applies to all
+commands with the exception of Probe.
+
+@{b}Command Buttons@{ub}
+---------------
+
+These buttons allow you to send commands to the selected device. Q-Device! will
+allow you to send any command to any device, regardless of whether that device
+supports it. If the device supports removable media, some commands may require
+the media to be inserted. Common errors are $5 when the device doesn't support
+the command, or $2 if the unit is not ready to receive commands, or that command
+cannot be peformed under current conditions, for example attempting to eject if
+the drive is locked.
+
+
+    @{b}Query@{ub}
+    @{" Probe Devices     " Link "Probe Devices"}
+    @{" Full Inquiry      " Link "Full Inquiry"}
+    @{" Capacity          " Link "Capacity"}
+    @{" Test Ready        " Link "Test Ready"}
+    @{" Device Parameters " Link "Device Parameters"}
+    @{" Show Firmware Logs" Link "Show Firmware Logs"}
+    @{" Serial #          " Link "Serial #"}
+    @{" Read TOC          " Link "Read TOC"}
+    @{" ATIP              " Link "ATIP"}
+
+    @{b}Control@{ub}
+    @{" Power Up          " Link "Power Up"}
+    @{" Power Down        " Link "Power Down"}
+    @{" Lock              " Link "Lock"}
+    @{" UnLock            " Link "UnLock"}
+    @{" Insert            " Link "Insert"}
+    @{" Eject             " Link "Eject"}
+    @{" Rewind/Rezero     " Link "Rewind"}
+
+    @{b}Diagnostic@{ub}
+    @{" Start Self Test   " Link "Start Self Test"}
+    @{" Show Defects      " Link "Show Defects"}
+
+
+@{b}Output@{ub}
+------
+
+Information and errors are displayed in this listview. Double clicking an
+appropriate entry, will perform a full inquiry on that device.
+
+@endnode
+
+@node "Probe Devices" "Probe Devices"
+
+                                 PROBE DEVICES
+                                 =============
+
+Probe attempts to discover devices attached to the bus controlled by the
+driver. Probe scans the AmigaDOS unit numbers specified in your preferences,
+which by default are 0 to 15. Some hardware may have LUNs in which case each
+LUN will appear on a different AmigaDOS unit. Probe returns the product, vendor,
+revision and type for each attached device. PLEASE NOTE: When Q-Device! means
+unit number, it means the unit number that AmigaDOS uses. This usually reflects
+your SCSI ID's, but not always. See the @{" FAQ " Link "FAQ"}
+
+@{b}@{i}Example Output 1@{ui}@{ub}:
+
+scsi.device [0]: ST32132               12.1:DIRECT ACCESS (eg Disk)
+scsi.device [1]: SAMSUNG SV2044D       MM20:DIRECT ACCESS (eg Disk)
+scsi.device [2]: <no device>
+scsi.device [3]: <no device>
+scsi.device [4]: <no device>
+scsi.device [5]: <no device>
+scsi.device [6]: <no device>
+scsi.device [7]: <no device>
+
+@{b}@{i}Example Output 2@{ui}@{ub}:
+
+gvpscsi.device [0]: QUANTUM FIREBALL ST3.2S 0F0C: DIRECT ACCESS (eg Disk)
+gvpscsi.device [1]: <no device>
+gvpscsi.device [2]: <no device>
+gvpscsi.device [3]: TEAC CDROM CD-516S      1.0G: CD-ROM
+gvpscsi.device [4]: <no device>
+gvpscsi.device [5]: <no device>
+gvpscsi.device [6]: <no device>
+gvpscsi.device [7]: <no device>
+
+@{b}@{i}Example Output 3@{ui}@{ub}:
+
+1230scsi.device [0]: DEC  RZ29B  (C) DEC 0014 :DIRECT ACCESS (eg Disk)
+1230scsi.device [1]: PLEXTOR CD-R  PREMIUM  1.04 :CD-ROM
+1230scsi.device [2]: PLEXTOR CD-ROM PX-40TS  1.05 :CD-ROM
+1230scsi.device [3]: <no device>
+1230scsi.device [4]: TEAC  MT-2ST/N70   RV B :SEQUENTIAL ACCESS (eg Tape)
+1230scsi.device [5]: IOMEGA ZIP 250   H.41 :DIRECT ACCESS (eg Disk)
+1230scsi.device [6]: UMAX  Astra 1200S  V2.3 :SCANNER
+1230scsi.device [7]: <no device>
+
+@endnode
+
+@node "Full Inquiry" "Full Inquiry"
+
+                             FULL INQUIRY
+                             ============
+
+Reads as much information as possible from the device to discover which
+standards it supports and its product information. The following information is
+returned:
+
+@{u}Driver@{uu}:
+The device driver used to communicate with the device
+
+@{u}Unit@{uu}:
+The unit number the device is attached to
+
+@{u}Vendor@{uu}:
+Usually the vendor/manufacturer of the device although some manufacturers store
+other information here.
+
+@{u}Product@{uu}:
+Usually the product name, although some manufacturers may leave this blank, or
+store other information here.
+
+@{u}Revision@{uu}:
+Usually the product revision although some manufacturers may leave this blank
+or store other information here.
+
+@{u}Type@{uu}:
+
+One of the following:
+
+  DIRECT-ACCESS    : Hard Disks, Zip Drives, Jaz Drives...
+  SEQUENTIAL-ACCESS: Tape Drives...
+  PRINTER          : Printer devices...
+  PROCESSOR        : Host Controller processor...
+  WRITE-ONCE       : Optical Disc writer...
+  CD-ROM           : CDROM drives...
+  SCANNER          : Image scanners...
+  OPTICAL MEMORY   : Optical stoage, PD Drives...
+  MEDIUM CHANGER   : Automatic Tape Changer...
+  COMMUNICATIONS   : Network Card-...
+  UNKNOWN          : Q-Device! does not recognise the hardware type.
+
+@{u}Removable Media@{uu}:
+
+Desribes whether the device supports removable media, for example a ZIP Drive
+or CD-ROM
+
+@{u}Vendor Type Modifier@{uu}:
+
+Usually only used with SCSI-1 devices and is a custom vendor value to
+describe the device.
+
+@{u}ISO Version@{uu}:
+
+A non-zero value means this device conforms in some way to the SCSI standard
+specified by the International Standards Organisation, known as ISO 9316
+
+@{u}ECMA Version@{uu}:
+
+A non-zero value means this device conforms in some way to the SCSI standard
+specified by the European Computer Manufacturers Association, known as ECMA-111
+
+@{u}ANSI Version@{uu}:
+
+A non-zero value means this device conforms in some way to the SCSI standard
+specified by the American National Standards Institute. The value usually
+represents the version of SCSI, ie SCSI-2 (X3T9.2). Many devices are capable of
+operating in different SCSI modes, this reports the actual mode they are
+currently using.
+
+@{u}AENC Support@{uu}:
+
+Describes whether the device supports the Asynchronous Event Notification
+Capability. This usually only applies to processor devices.
+
+@{u}TrmIOP Support@{uu}:
+
+Describes whether the device supports the TERMINATE I/O PROCESS command, a
+method by which a device can be asked to terminate the current IO command,
+without corrupting the media.
+
+@{u}Relative Addressing@{uu}:
+
+Describes whether the device has the ability to interpret addresses specified
+as an offset from the last accessed logical address. Relative addressing can
+only be used with Linked commands.
+
+@{u}32bit Support@{uu}:
+
+Describes whether this device can support 32bit wide transfers.
+
+@{u}16bit Support@{uu}:
+
+Describes whether this device can support 16bit wide transfers.
+
+@{u}8bit Support@{uu}:
+
+Describes whether this device can support 8bit transfers. All SCSI devices
+should support this. 
+
+@{u}Synchronous Support@{uu}:
+
+Describes whether the device is capable of performing Synchronous Transfers or
+only Asynchronous Transfers.
+
+@{u}Linked Support@{uu}:
+
+Desribes whether the device has the ability to accept chained commands to
+continue the I/O process
+
+@{u}Command Queuing Support@{uu}:
+
+Describes whether the device is capable of queuing commands, possibly from
+multiple sources to be performed in an optimal way thus increasing performance.
+
+@{u}Supported Reset Type@{uu}:
+
+Describes whether the device supports either Hard, or Soft resets. A hard reset
+returns a device to a state roughtly equivalent to that after power on. A soft
+reset attempts to preserve the current I/O processes and provide minimum
+disruption to other initiators.
+
+@{b}@{i}Example Output@{ui}@{ub}:
+
+Driver:                 gvpscsi.device
+Unit:                   0
+Vendor:                 QUANTUM
+Product:                FIREBALL ST3.2S
+Revision:               0F0C
+Type:                   DIRECT ACCESS (eg Disk)
+Removable Media:        No
+Vendor Type Modifier:   0
+ISO Version:            0
+ECMA Version:           0
+ANSI Version:           2 (SCSI Version)
+AENC Support:           No
+TrmIOP Support:         No
+Relative Addressing:    No
+32bit Support:          No
+16bit Support:          No
+8bit Support:           Yes
+Synchronous Support:    Yes
+Linked Support:         Yes
+Command Queuing Support:Yes
+Supported Reset Type    Hard
+
+@endnode
+
+@node "Capacity" "Capacity"
+
+                                    CAPACITY
+                                    ========
+
+Attempts to discover the capacity of the medium. The exact meaning may vary
+slighty between devices. Devices which have read/write media tend to report the
+actual size of the disk, devices which use read only media tend to report the
+size of the contents.
+
+@{u}Blocks@{uu}:
+
+The number of blocks on the medium.
+
+@{u}Block Size@{uu}:
+
+The size in bytes of an individual block. This is usually 512 bytes for disks
+and 2048 bytes (but not always) for CD-ROMs.
+
+@{u}True Capacity@{uu}:
+
+Reports the capacity of the medium using the correct values of:
+
+    Kilobyte = 1024 Bytes
+    Megabyte = 1024 Kilobytes
+    Gigabyte = 1024 Megabytes
+
+@{u}Vendor Capacity@{uu}:
+
+It is almost universal these days for hard disk manufacturers to mis-represent
+the true sizes of their products by using slightly different formulae to give
+the consumer the impression that their disks are bigger than they really are.
+This reports the capacity of the medium using the values of:
+
+    Kilobyte = 1000 Bytes
+    Megabyte = 1000 Kilobytes
+    Gigabyte = 1000 Megabytes
+
+@{i}@{b}Example Output@{ub}@{ui}:
+
+Blocks:          4127759
+Block Size:      512 bytes
+True Capacity:   ~ 1.9GB (2015 MB)
+Vendor Capacity: ~ 2.1gb (2113 mb)
+
+@endnode
+
+@node "Test Ready" "Test Ready"
+
+                                   TEST READY
+                                   ==========
+
+Queries the device to discover whether it is ready to receive commands.
+Q-Device! will either report that the unit is ready, or sense data will be
+reported saying the device is not ready. Common causes for non-readiness
+may include media not being inserted or the device may be powered down.
+
+@endnode
+
+@node "Power Up" "Power Up"
+
+                                    POWER UP
+                                    ========
+
+Attempts to spin up the device by sending it the start command. This command
+is only really useful, if the device has been powered down.
+
+Known Side Effects:
+1. Some devices respond by inserting their media.
+2. WARNING: Some scanners may begin moving their scanner head and attempt to
+   move it beyond its physical boundary.
+
+@endnode
+
+@node "Power Down" "Power Down"
+
+                                   POWER DOWN
+                                   ==========
+
+Attempts to spin down the device.
+
+Known Side Effects:
+1. Some devices respond by ejecting their media.
+2. WARNING: Some scanners may begin moving their scanner head and attempt to
+   move it beyond its physical boundary.
+
+@endnode
+
+@node "Lock" "Lock"
+
+                                      LOCK
+                                      ====
+
+Usually only useful for devices that support removable media, this command
+attempts to stop the media from being removed. Ignoring attempts to eject it
+both by software and physically
+
+@endnode
+
+@node "UnLock" "UnLock"
+
+                                     UNLOCK
+                                     ======
+
+Usually only useful for devices that support removable media, this command
+attempts to unlock the device, allowing the media to be ejected both by
+software and physically.
+
+Known Side Effects:
+1. Some devices cache any eject request they received when in the locked state
+   and will immediately eject when unlocked.
+2. Some devices respond by always ejecting their media.
+
+@endnode
+
+@node "Insert" "Insert"
+
+                                     INSERT
+                                     ======
+
+Usually only useful for some devices that support removable media, this command
+attempts to insert the media.
+
+Known Side Effects:
+1. Some devices may respond by spinning up. Usually devices which don't support
+   removable media.
+
+@endnode
+
+@node "Eject" "Eject"
+
+                                     EJECT
+                                     =====
+
+Usually only useful for devices that support removable media, this command
+attempts to eject the media. 
+
+Known Side Effects:
+1. Some devices may respond by powering down, usually devices that don't
+   support removable media.
+
+@endnode
+
+@node "Rewind" "Rewind"
+
+                                 REWIND/REZERO
+                                 =============
+
+In the case of sequential access devices, this command will attempt to rewind
+the tape to the start. For all other devices, it will rezero them. What the
+device does when it rezero's is vendor specific, but it often means to move
+the heads, servos etc back to the position they are in after power on.
+
+NOTE: Q-Device does not use the "immed" flag as it is compatible with more
+devices, however this means the interface will not respond until the
+operation has completed. Rewinding a tape can take a while.
+
+
+@endnode
+
+@node "Read TOC" "Read TOC"
+
+                                    READ TOC
+                                    ========
+
+Usually only useful for CD-ROM and related devices, this command attempts to
+read and display the Table of Contents on the currently inserted CD.
+
+@{u}Starting Track@{uu}:
+
+The number of the first track on the CD. Usually 1.
+
+@{u}Last Track@{uu}:
+
+The number of the last track on the CD.
+
+@{u}Track Number@{uu}:
+
+The number of the track, which should be between "Starting Track" and "Last
+Track" inclusive.
+
+@{u}Track Type@{uu}:
+
+One of DATA or AUDIO
+
+@{u}Copyright@{uu}:
+
+Describes whether you are legally allowed to digitally copy this track or not.
+
+@{u}Audio Channels@{uu}:
+
+Reported only for AUDIO tracks, it reports the number of audio channels it uses
+Either 2, or 4.
+
+@{u}Emphasis@{uu}
+
+Reported only for AUDIO tracks, it describes whether the AUDIO has been
+pre-emphasised or not.
+
+@{b}@{i}Example Output@{ui}@{ub}
+
+Starting Track: 1
+Last Track:     2
+
+Track Number:   1
+Track Type:     DATA
+Copyright:      Digital Copy Prohibited
+
+Track Number:   2
+Track Type:     AUDIO
+Audio Channels: 2
+Emphasis:       Audio IS pre-emphasised
+Copyright:      Digital Copy Prohibited.
+
+
+@endnode
+
+@node "Start Self Test" "Start Self Test"
+
+                                START SELF TEST
+                                ===============
+
+Instructs the device to perform a self test to ensure it's integrity. Four test
+types are supported, which are described below. The device performs a self test
+by executing special code contained within the firmware of the device and is
+vendor specific. If a device fails a self test then Q-Device! will report a
+Hardware Failure or that the medium may contain defects, otherwise it will
+report that the device has passed the test. Q-Device! cannot report the specific
+details of a failure, only that one has occurred. @{b}NOTE:@{ub} You are entirely
+responsible for any actions you take, in the event of Q-Device! reporting a
+hardware failure, even if the failure was mis-reported due to software errors.
+
+Diagnostic Tests
+----------------
+
+Any SCSI device should support at least one of the diagnostic tests. IDE
+Devices might not support any of the tests.
+
+@{u}Simple Test@{uu}
+
+Instructs the device to perform a self test with minimal interruption to normal
+service. In other words, tests which may interfere with normal access by the
+operating system or applications will not be performed.
+
+@{u}Deep Test@{uu}
+
+Instructs the device to perform a full self test. The device will also perform
+any tests which may temporarily interfere with normal access by the operating
+system or applications. The diagnostic tests may require the device to go
+offline temporarily or make temporary changes to the medium.
+
+
+There is very little difference between type 1 and type 2 tests, other than
+telling the device which page format to use for retrieving the results. They
+are both provided as some devices may only support one page format or the other
+
+@endnode
+
+@node "Show Defects" "Show Defects"
+
+                                  SHOW DEFECTS
+                                  ============
+ 
+Requests that the device returns information describing its defects. The
+defects can be returned in three formats. These are "Physical Sector",
+"Bytes From Index" and "Block". Devices may not support all or any of these
+formats. Three list types are supported, these are "Primary", "Grown" and
+"Both", which is simply the primary and grown lists merged as one.
+
+NOTE: Defects do not necessarily mean your device is faulty. These are lists
+of defects which have been reassigned to areas of the medium kept in reserve
+for such purposes. Defects are very common and in fact most devices leave the
+factory containing reassigned defects, hence the primary list.
+
+
+List Formats
+============
+
+@{u}Physical Sector@{uu}
+
+Represents the location of errors in CHS (Cylinder, Head, Sector) format. More
+than one block may be represented by a single defect. If a sector value is
+given as $FFFFFFFF, then it means the entire track is defective.
+
+@{u}Bytes From Index@{uu}
+
+Represents the location of errors in CHI (Cylinder, Head, Index) format. More 
+than one block may be represented by a single defect. If an index value is
+given as $FFFFFFFF, then it means the entire track is defective.
+
+@{u}Block@{uu}
+
+Represents the location of errors as a block address. More than one physical or
+logical block may be represented by a single defect.
+
+
+Defect Lists
+------------
+
+@{u}Primary List@{uu}
+
+Sometimes referred to as Factory Defects, contains a list of defects which have
+been discovered during the testing phase at the factory. Usually the list
+cannot be cleared with a low level format.
+
+@{u}Grown List@{uu}
+
+Sometimes referred to as the Secondary List, contains a list of defects which
+have occured or been discovered during the operational lifetime of the device.
+A low level format may clear this list
+
+@{u}Both@{uu}
+
+Returns both primary and grown defects merged as a single list
+
+
+@{b}@{i}Example Output 1@{ui}@{ub}
+
+List Type: Primary
+Format: Physical Sector
+Defect List Size: 216 bytes
+Number of Defects: 27
+
+Defect Found: Cylinder: 31, Head: 1, Sector: 264 ($108)
+Defect Found: Cylinder: 324, Head: 0, Sector: 95 ($5F)
+Defect Found: Cylinder: 325, Head: 0, Sector: 4 ($4)
+Defect Found: Cylinder: 326, Head: 0, Sector: 186 ($BA)
+Defect Found: Cylinder: 327, Head: 0, Sector: 95 ($5F)
+Defect Found: Cylinder: 328, Head: 0, Sector: 4 ($4)
+Defect Found: Cylinder: 329, Head: 0, Sector: 186 ($BA)
+Defect Found: Cylinder: 330, Head: 0, Sector: 95 ($5F)
+Defect Found: Cylinder: 665, Head: 2, Sector: 63 ($3F)
+Defect Found: Cylinder: 665, Head: 2, Sector: 64 ($40)
+Defect Found: Cylinder: 1012, Head: 0, Sector: 148 ($94)
+Defect Found: Cylinder: 1237, Head: 2, Sector: 83 ($53)
+Defect Found: Cylinder: 1431, Head: 0, Sector: 6 ($6)
+Defect Found: Cylinder: 1836, Head: 2, Sector: 69 ($45)
+Defect Found: Cylinder: 2059, Head: 3, Sector: 197 ($C5)
+Defect Found: Cylinder: 2216, Head: 3, Sector: 185 ($B9)
+Defect Found: Cylinder: 3740, Head: 0, Sector: 207 ($CF)
+Defect Found: Cylinder: 3861, Head: 0, Sector: 61 ($3D)
+Defect Found: Cylinder: 4624, Head: 3, Sector: 107 ($6B)
+Defect Found: Cylinder: 4686, Head: 2, Sector: 109 ($6D)
+Defect Found: Cylinder: 5264, Head: 0, Sector: 41 ($29)
+Defect Found: Cylinder: 5384, Head: 1, Sector: 48 ($30)
+Defect Found: Cylinder: 5711, Head: 0, Sector: 155 ($9B)
+Defect Found: Cylinder: 5711, Head: 0, Sector: 156 ($9C)
+Defect Found: Cylinder: 5971, Head: 1, Sector: 148 ($94)
+Defect Found: Cylinder: 6812, Head: 2, Sector: 148 ($94)
+Defect Found: Cylinder: 6897, Head: 0, Sector: 137 ($89)
+
+@{b}@{i}Example Output 2@{ui}@{ub}
+
+List Type: Both Primary and Grown
+Format: Bytes From Index
+Defect List Size: 488 bytes
+Number of Defects: 61
+
+Defect Found: Cylinder: 405, Head: 3, Bytes From Index: 34816 ($8800)
+Defect Found: Cylinder: 536, Head: 3, Bytes From Index: 70656 ($11400)
+Defect Found: Cylinder: 602, Head: 4, Bytes From Index: 71680 ($11800)
+Defect Found: Cylinder: 602, Head: 4, Bytes From Index: 72192 ($11A00)
+Defect Found: Cylinder: 602, Head: 4, Bytes From Index: 72704 ($11C00)
+Defect Found: Cylinder: 602, Head: 4, Bytes From Index: 73216 ($11E00)
+Defect Found: Cylinder: 602, Head: 4, Bytes From Index: 73728 ($12000)
+Defect Found: Cylinder: 602, Head: 4, Bytes From Index: 74240 ($12200)
+Defect Found: Cylinder: 602, Head: 4, Bytes From Index: 74752 ($12400)
+Defect Found: Cylinder: 602, Head: 4, Bytes From Index: 75264 ($12600)
+Defect Found: Cylinder: 602, Head: 4, Bytes From Index: 75776 ($12800)
+Defect Found: Cylinder: 602, Head: 4, Bytes From Index: 76288 ($12A00)
+Defect Found: Cylinder: 602, Head: 4, Bytes From Index: 76800 ($12C00)
+Defect Found: Cylinder: 602, Head: 4, Bytes From Index: 77312 ($12E00)
+Defect Found: Cylinder: 602, Head: 4, Bytes From Index: 77824 ($13000)
+Defect Found: Cylinder: 909, Head: 1, Bytes From Index: 71680 ($11800)
+Defect Found: Cylinder: 1002, Head: 4, Bytes From Index: 25088 ($6200)
+Defect Found: Cylinder: 1058, Head: 0, Bytes From Index: 11776 ($2E00)
+Defect Found: Cylinder: 1059, Head: 0, Bytes From Index: 11776 ($2E00)
+Defect Found: Cylinder: 1060, Head: 0, Bytes From Index: 11776 ($2E00)
+Defect Found: Cylinder: 1068, Head: 0, Bytes From Index: 11776 ($2E00)
+Defect Found: Cylinder: 1210, Head: 0, Bytes From Index: 85504 ($14E00)
+Defect Found: Cylinder: 1365, Head: 3, Bytes From Index: 7680 ($1E00)
+Defect Found: Cylinder: 1416, Head: 4, Bytes From Index: 68608 ($10C00)
+Defect Found: Cylinder: 1417, Head: 4, Bytes From Index: 68608 ($10C00)
+Defect Found: Cylinder: 1440, Head: 0, Bytes From Index: 48128 ($BC00)
+Defect Found: Cylinder: 2741, Head: 4, Bytes From Index: 3072 ($C00)
+Defect Found: Cylinder: 2863, Head: 4, Bytes From Index: 88064 ($15800)
+Defect Found: Cylinder: 3754, Head: 1, Bytes From Index: 64000 ($FA00)
+Defect Found: Cylinder: 3755, Head: 1, Bytes From Index: 64000 ($FA00)
+Defect Found: Cylinder: 3848, Head: 0, Bytes From Index: 19968 ($4E00)
+Defect Found: Cylinder: 4509, Head: 4, Bytes From Index: 81920 ($14000)
+Defect Found: Cylinder: 4510, Head: 4, Bytes From Index: 81920 ($14000)
+Defect Found: Cylinder: 4584, Head: 2, Bytes From Index: 76288 ($12A00)
+Defect Found: Cylinder: 4891, Head: 0, Bytes From Index: 49664 ($C200)
+Defect Found: Cylinder: 4984, Head: 3, Bytes From Index: 25600 ($6400)
+Defect Found: Cylinder: 5135, Head: 4, Bytes From Index: 33792 ($8400)
+Defect Found: Cylinder: 5668, Head: 4, Bytes From Index: 20992 ($5200)
+Defect Found: Cylinder: 5866, Head: 0, Bytes From Index: 93696 ($16E00)
+Defect Found: Cylinder: 5868, Head: 4, Bytes From Index: 7680 ($1E00)
+Defect Found: Cylinder: 5868, Head: 4, Bytes From Index: 52224 ($CC00)
+Defect Found: Cylinder: 5868, Head: 4, Bytes From Index: 52736 ($CE00)
+Defect Found: Cylinder: 5868, Head: 4, Bytes From Index: 53248 ($D000)
+Defect Found: Cylinder: 5868, Head: 4, Bytes From Index: 53760 ($D200)
+Defect Found: Cylinder: 5868, Head: 4, Bytes From Index: 54272 ($D400)
+Defect Found: Cylinder: 5868, Head: 4, Bytes From Index: 54784 ($D600)
+Defect Found: Cylinder: 5868, Head: 4, Bytes From Index: 55296 ($D800)
+Defect Found: Cylinder: 5868, Head: 4, Bytes From Index: 55808 ($DA00)
+Defect Found: Cylinder: 5868, Head: 4, Bytes From Index: 56320 ($DC00)
+Defect Found: Cylinder: 5868, Head: 4, Bytes From Index: 56832 ($DE00)
+Defect Found: Cylinder: 5935, Head: 4, Bytes From Index: 23552 ($5C00)
+Defect Found: Cylinder: 6175, Head: 4, Bytes From Index: 45568 ($B200)
+Defect Found: Cylinder: 6469, Head: 4, Bytes From Index: 37888 ($9400)
+Defect Found: Cylinder: 6668, Head: 0, Bytes From Index: 36864 ($9000)
+Defect Found: Cylinder: 6670, Head: 0, Bytes From Index: 36864 ($9000)
+Defect Found: Cylinder: 6888, Head: 4, Bytes From Index: 53760 ($D200)
+Defect Found: Cylinder: 6907, Head: 4, Bytes From Index: 12800 ($3200)
+Defect Found: Cylinder: 6917, Head: 2, Bytes From Index: 67584 ($10800)
+Defect Found: Cylinder: 7328, Head: 0, Bytes From Index: 14848 ($3A00)
+Defect Found: Cylinder: 7634, Head: 3, Bytes From Index: 37888 ($9400)
+Defect Found: Cylinder: 8115, Head: 4, Bytes From Index: 31744 ($7C00)
+
+@{b}@{i}Example Output 3@{ui}@{ub}
+
+List Type: Primary
+Format: Block
+Defect List Size: 420 bytes
+Number of Defects: 105
+
+Defect Found: Defective Block Address: 452940 ($6E94C)
+Defect Found: Defective Block Address: 456630 ($6F7B6)
+Defect Found: Defective Block Address: 459895 ($70477)
+Defect Found: Defective Block Address: 2098718 ($20061E)
+Defect Found: Defective Block Address: 2101983 ($2012DF)
+Defect Found: Defective Block Address: 2105673 ($202149)
+Defect Found: Defective Block Address: 2108938 ($202E0A)
+Defect Found: Defective Block Address: 2112203 ($203ACB)
+Defect Found: Defective Block Address: 2119158 ($2055F6)
+Defect Found: Defective Block Address: 2122423 ($2062B7)
+Defect Found: Defective Block Address: 2125688 ($206F78)
+Defect Found: Defective Block Address: 2129378 ($207DE2)
+Defect Found: Defective Block Address: 2132643 ($208AA3)
+Defect Found: Defective Block Address: 2135908 ($209764)
+Defect Found: Defective Block Address: 2139173 ($20A425)
+Defect Found: Defective Block Address: 2142863 ($20B28F)
+Defect Found: Defective Block Address: 2146128 ($20BF50)
+Defect Found: Defective Block Address: 2149393 ($20CC11)
+Defect Found: Defective Block Address: 2152658 ($20D8D2)
+Defect Found: Defective Block Address: 2156348 ($20E73C)
+Defect Found: Defective Block Address: 2159613 ($20F3FD)
+Defect Found: Defective Block Address: 2162878 ($2100BE)
+Defect Found: Defective Block Address: 2166568 ($210F28)
+Defect Found: Defective Block Address: 2169833 ($211BE9)
+Defect Found: Defective Block Address: 2173098 ($2128AA)
+Defect Found: Defective Block Address: 2176363 ($21356B)
+Defect Found: Defective Block Address: 2180053 ($2143D5)
+Defect Found: Defective Block Address: 2183318 ($215096)
+Defect Found: Defective Block Address: 2186583 ($215D57)
+Defect Found: Defective Block Address: 2189848 ($216A18)
+Defect Found: Defective Block Address: 2193538 ($217882)
+Defect Found: Defective Block Address: 2196803 ($218543)
+Defect Found: Defective Block Address: 2200068 ($219204)
+Defect Found: Defective Block Address: 2203758 ($21A06E)
+Defect Found: Defective Block Address: 2207023 ($21AD2F)
+Defect Found: Defective Block Address: 2210288 ($21B9F0)
+Defect Found: Defective Block Address: 2213553 ($21C6B1)
+Defect Found: Defective Block Address: 2217243 ($21D51B)
+Defect Found: Defective Block Address: 2220508 ($21E1DC)
+Defect Found: Defective Block Address: 2223773 ($21EE9D)
+Defect Found: Defective Block Address: 2227038 ($21FB5E)
+Defect Found: Defective Block Address: 2230728 ($2209C8)
+Defect Found: Defective Block Address: 2233993 ($221689)
+Defect Found: Defective Block Address: 2237258 ($22234A)
+Defect Found: Defective Block Address: 2244213 ($223E75)
+Defect Found: Defective Block Address: 2247478 ($224B36)
+Defect Found: Defective Block Address: 2250743 ($2257F7)
+Defect Found: Defective Block Address: 2254433 ($226661)
+Defect Found: Defective Block Address: 2257698 ($227322)
+Defect Found: Defective Block Address: 2260963 ($227FE3)
+Defect Found: Defective Block Address: 2264228 ($228CA4)
+Defect Found: Defective Block Address: 2267918 ($229B0E)
+
+
+@endnode
+
+
+@node "Device Parameters" "Device Parameters"
+
+                               DEVICE PARAMETERS
+                               =================
+
+Most drivers for IDE devices do not emulate this command very well, so results
+will be minimal. This command tries to discover as much information as possible
+about the device's configuration. This information is returned from the
+hardware's firmware in the form of pages. Devices do not return information
+for every page, only the ones they support. 
+
+
+ALL SCSI DEVICES
+----------------
+ $2, Disconnection and Reconnection
+ $9, Interface Mode
+ $A, Control Mode
+$18, Protocol Specific LUN
+$19, Protocol Specifics
+$1A, Power Condition
+$1C, SCSI SMART Control
+
+
+CDROM DEVICES
+-------------
+ $1, Read/Write Error Recovery 
+ $7, Verify Error Recovery 
+ $8, Cache Parameters
+ $B, Supported Media
+ $D, CDROM 
+ $E, CDROM Audio Control 
+$2A, CDROM Capabilities and Mechanical Status
+
+
+CHANGER DEVICES
+---------------
+$1D, Element Address Assignment
+$1E, Transport Geometry
+$1F, Medium Changer Device Capabilities
+
+
+DIRECT ACCESS DEVICES
+---------------------
+ $1, Read/Write Error Recovery
+ $3, Formatting
+ $4, Rigid Disk Geometry
+ $5, Flexible Disk Geometry
+ $7, Verify Error Recovery 
+ $8, Cache 
+ $B, Supported Media
+ $C, Notch 
+ $D, Power Condition (Quantum)
+$2F, Spindown Timing 
+$21, Extended Error Recovery
+$39, Quantum Unique Drive Control (Quantum)
+
+
+OPTICAL DEVICES
+---------------
+ $1, Read/Write Error Recovery
+ $6, Optical Memory
+ $7, Verify Error Recovery
+ $8, Cache 
+ $B, Supported Media
+$20, Format (IBM)
+$21, Control (IBM)
+
+
+PRINTER DEVICES
+---------------
+$3, Parallel Printer Interface
+$4, Serial Printer Interface
+$5, Printer Options
+
+
+SCANNER DEVICES
+---------------
+$3, Measurement Units
+
+
+SEQUENTIAL ACCESS DEVICES
+-------------------------
+ $1, Read/Write Error Recovery
+ $7, Verify Error Recovery
+ $F, Data Compression Characteristics
+$10, Sequential Device Configuration
+$11, Medium Partition Page (1)
+$12, Medium Partition Page (2)
+$13, Medium Partition Page (3)
+$14, Medium Partition Page (4)
+
+
+WRITE ONCE DEVICES
+------------------
+$1, Read/Write Error Recovery
+$6, Optical Memory 
+$7, Verify Error Recovery
+$8, Cache
+$B, Supported Media
+
+
+@{i}@{b}Example Output 1@{ub}@{ui}
+
+Mode Sense Cmdsize: 10 bytes
+Mode Data Length: 162 bytes
+Inserted Medium Type: Default
+Write Protected: No
+Descriptor Length: 8 bytes
+Density Code: Reserved or vendor specific
+Number of Blocks: 6328861
+Block Length: 512 bytes
+
+Information Page: Read/Write Error Recovery
+Page Code: $1
+Save to NVRAM Supported: Yes
+Page Length: 10 bytes
+Automatic Write Reallocation: Yes
+Automatic Read Reallocation: Yes
+Transfer Block (TB): Don't transfer erroneous block to initiator
+Read Continuous (RC): Tolerate error recovery delays
+Enable Early Recovery (EER): Minimise risk of error mis-correction
+Post Recoverable Error (PER): Don't report recovered errors
+Disable Transfer on Error (DTE): Don't terminate data phase on error
+Disable Correction (DCR): Use error correction codes
+Retries on Read Error: 8
+Correction Span: 24 bits
+Head Offset Count: 10
+Data Strobe Offset Count: 0
+Retries on Write Error: 8
+Recovery Time Limit: 0 ms
+
+Information Page: Disconnection and Reconnection Parameters
+Page Code: $2
+Save to NVRAM Supported: Yes
+Page Length: 10 bytes
+Buffer Full Ratio: 192
+Buffer Empty Ratio: 64
+Bus Inactivity Limit: 0 *100 us
+Disconnect Time Limit: 0 *100 us
+Connect Time Limit: 0 *100 us
+Maximum Burst Size: 0 *512 bytes
+Data Transfer Disconnect Control: No disconnection until command complete
+
+Information Page: Formatting Parameters
+Page Code: $3
+Save to NVRAM supported: No
+Page Length: 22 bytes
+Tracks Per Zone: 4
+Alternate Sectors Per Zone: 32
+Alternate Tracks Per Zone: 0
+Alternate Tracks Per Logical Unit: 0
+Sectors Per Track: 159
+Bytes Per Physical Sector: 512
+Interleave: 1
+Track Skew Factor: 28 sectors
+Cylinder Skew Factor: 28 sectors
+Supports Soft Sector Formatting: Yes
+Supports Hard Sector Formatting: No
+Supports Removable Media: No
+Surface Bit: Off
+
+Information Page: Rigid Disk Geometry Parameters
+Page Code: $4
+Save to NVRAM supported: No
+Page Length: 22 bytes
+Cylinders: 7068
+Heads: 4
+Start Write PreComp: 7068
+Start Reduced Write: 7068
+Step Rate: Device Default
+Landing Cylinder: 0
+Rotational Offset: 0
+Rotation Rate: 5400 rpm
+
+Information Page: Cache
+Page Code: $8
+Save to NVRAM supported: Yes
+Page Length: 10 bytes
+Read Cache: Enabled
+Multiplication Factor: Min/Max pre-fetch in terms of logical blocks
+Write Cache: Enabled
+Demand Read Retention Priority: 0
+Write Retention Priority: 0
+Disable Pre-Fetch Transfer Length: 65535 blocks
+Min Pre-Fetch: 0 bytes/scalar
+Max Pre-Fetch: 65535 bytes/scalar
+Max Pre-Fetch Ceiling: 0 blocks
+
+Information Page: Control Mode
+Page Code: $A
+Save to NVRAM supported: Yes
+Page Length: 6 bytes
+Report Log Exceptions: No
+Queuing Algorithm: Restricted reordering
+Queue Error Management: Resume after contingent allegiance
+Queuing: Enabled
+Extended Contingent Allegiance: Disabled
+Ready AEN Permission: No AEN on init sequence completion
+Unit Attention AEN Permission: Will not issue AEN instead of UAC
+Error AEN Permission: Will not issue AEN on DEC detection
+AEN Holdoff Period: 0 ms
+
+Information Page: Notch Parameters
+Page Code: $C
+Save to NVRAM supported: No
+Page Length: 22 bytes
+Notched Drive: Yes
+Maximum Notches: 15
+Active Notch: 0
+Notch Boundary Type (LPN): Physical
+Active Notch Starting Boundary: Cylinder: 0, Head: 0
+Active Notch Ending Boundary: Cylinder: 7067, Head: 3
+Pages Notched Bitmap (8 bytes): $01018
+
+Information Page: Power Condition (Quantum)
+Warning: Page format may be device specific. Info may be incorrect
+Reference: Quantum Fireball ST 2.1/3.2/4.3/6.4 GB S
+Page Code: $D
+Save to NVRAM supported: Yes
+Page Length: 10 bytes
+Standby Support Enabled: No
+Idle Time to Enter Standby: 0 *100 ms
+
+Information Page: SCSI SMART Control
+Page Code: $1C
+Save to NVRAM supported: Yes
+Page Length: 10 bytes
+Location of Exception Logs: Vendor specific location
+Exception Control: Information exceptions enabled
+Performance: Delays due to IE acceptable
+Test: False drive notifications disallowed
+Reporting Type: Information conditions not reported
+Interval Timer: 0
+Report Count: 0
+
+Information Page: Quantum Unique Drive Control (Quantum)
+Warning: Page format may be device specific. Info may be incorrect
+Reference: Quantum Fireball ST 2.1/3.2/4.3/6.4 GB S
+Page Code: $39
+Save to NVRAM supported: Yes
+Page Length: 6 bytes
+Identify Out: Identify required to disconnect
+Identify In: Identify sent after reconnection
+Preserve Synchronous Mode: Reset will clear synchronous parameters
+Reallocate Hard Errors: Yes
+Fill Data Pattern: Disabled
+Send Synchronous Message: No
+Disable Unit Attention: No
+Disable Reselection Timeout: No
+Disable Disconnection: No
+Software Selectable SCSI ID: ID assigned by jumpers
+Software SCSI ID: 0
+Plug n Play SCSI: Enabled
+Use Motor Delay Time: No
+Parity Control: Disabled
+Perform Wait/Spin: No
+Motor Delay Time: 0 *10 ms
+
+@{i}@{b}Example Output 2@{ub}@{ui}:
+
+Mode Sense Cmdsize: 10 bytes
+Mode Data Length: 58 bytes
+Inserted Medium Type: 120 mm CD-ROM data only
+Write Protected: No
+Descriptor Length: 0 bytes
+
+Information Page: Read/Write Error Recovery
+Page Code: $1
+Save to NVRAM Supported: No
+Page Length: 6
+Automatic Write Reallocation: No
+Automatic Read Reallocation: No
+Transfer Block (TB): Transfer erroneous block to initiator
+Read Continuous (RC): Tolerate error recovery delays
+Enable Early Recovery (EER): Minimise risk of error mis-correction
+Post Recoverable Error (PER): Don't report recovered errors
+Disable Transfer on Error (DTE): Don't terminate data phase on error
+Disable Correction (DCR): Use error correction codes
+Retries on Read Error: 88
+
+Information Page: CD-ROM Parameters
+Page Code: $D
+Save to NVRAM supported: No
+Page Length: 6 bytes
+Inactivity Multiplier: Vendor specific
+S Units per MSF: 60
+F Units per MSF: 75
+
+Information Page: CD-ROM Audio Control
+Page Code: $E
+Save to NVRAM supported: No
+Page Length: 14 bytes
+Audio Completion Status: On Audio Termination
+Stop on Track Crossing: When transfer length satisfied
+Audio Playback Rate Valid: No
+Format of LBA/sec: 1 (multiplier for LBA/sec)
+LBA/sec per audio: 75 blocks
+Port 0 Channel Selection: Connect audio channel 0 to this port
+Port 0 Volume Level: 255 (255 = Full Voume)
+Port 1 Channel Selection: Connect audio channel 1 to this port
+Port 1 Volume Level: 255 (255 = Full Voume)
+Port 2 Channel Selection: Port Muted
+Port 2 Volume Level: 0 (255 = Full Voume)
+Port 3 Channel Selection: Port Muted
+Port 3 Volume Level: 0 (255 = Full Voume)
+
+Information Page: CDROM Capabilities and Mechanical Status
+Page Code: $2A
+Save to NVRAM supported: No
+Page Length: 18 bytes
+Maximum Supported Speed: 8448 kbyte/sec
+Minimum Supported Speed: 255 kbyte/sec
+Buffer Size: 128 K
+Current Selected Speed: 704 kbyte/sec
+
+
+@endnode
+
+@node "Firmware Logs" "Firmware Logs"
+
+                                 FIRMWARE LOGS
+                                 ==============
+
+The option attempts to retrieve and decode the logs stored in the device's
+firmware. Not all SCSI devices store logs, and in particular this option
+doesn't seem to be supported by non-SCSI devices. In the case where there are
+alternative decodings for a particular page, Q-Device will show both decodings,
+as it is impossible for Q-Device to tell which decoding actually applies to
+your device.
+
+Q-Device! is able to recognise the following logs:
+(!) = Log is recognised but cannot be decoded yet.
+
+     $0, List of Supported Log Types
+     $1, Buffer Over-run and Under-run Log
+     $2, Write Error Log
+     $3, Read Error Log
+     $4, Reverse Read Error Log
+     $5, Verify Error Log
+     $6, Non-Medium Error Log
+(!)  $7, Last number of Error Events
+(!)  $8, Format Status
+(!)  $9, Reserved to the MS59 Standard
+(!)  $A, Reserved to the MS59 Standard
+(!)  $B, Last # deferred errors or Async Events
+(!)  $C, Sequential Access Log
+     $D, Temperature Log
+(!)  $E, Start Stop Cycle Log
+(!)  $F, Application Client Log
+(!) $10, Self Test Results
+(!) $11, DTD Status Log
+(!) $12, Tape Alert Response
+(!) $13, Requested Recovery Log
+(!) $14, Device Statistics
+(!) $17, Non-Volatile Cache
+(!) $18, Protocol Specific Port
+(!) $2E, TapeAlert Log
+    $2F, Informational Exceptions
+    $30, SMART Sense Data
+    $30, Performance Counters (IBM)
+(!) $32, Physical Error Sites (IBM)
+(!) $33, LBA Error Sites (IBM)
+    $35, Cache Statistics (IBM)
+    $36, Temperature Log (IBM)
+(!) $37, Cache Statistics (Seagate)
+(!) $3E, Factory Log (Seagate)
+
+
+@{b}@{i}Example Output@{ui}@{ub}
+
+Log Type: List of supported log types
+Log Size: 8 bytes
+
+Found Log: Write Errors
+Log Code: $2
+Log Size: 44 bytes
+Total Re-writes or Re-reads: 0
+Total Errors Corrected: 0
+Times Correction Algorithm Used: 0
+Total Bytes Processed: $C3391C800
+Uncorrected Errors: 0
+
+Found Log: Read Errors
+Log Code: $3
+Log Size: 52 bytes
+Errors Corrected w/o Delay: 0
+Total Re-writes or Re-reads: 0
+Total Errors Corrected: 0
+Times Correction Algorithm Used: 0
+Total Bytes Processed: $254D63600
+Uncorrected Errors: 0
+
+Found Log: Verify Errors
+Log Code: $5
+Log Size: 52 bytes
+Errors Corrected w/o Delay: 0
+Total Re-writes or Re-reads: 0
+Total Errors Corrected: 0
+Times Correction Algorithm Used: 0
+Total Bytes Processed: $330C33BA8
+Uncorrected Errors: 0
+
+Found Log: Non-medium Errors
+Log Code: $6
+Log Size: 8 bytes
+Non-Medium Error Count: 614
+
+Found Log: Format Status
+Log Code: $8 (Cannot Decode Yet)
+
+Found Log: Informational Exceptions Status
+Log Code: $2F
+Log Size: 6 bytes
+Parameter Code: 0
+Parameter Size: 2 bytes
+SMART Sense Code: $0
+SMART Sense Qualifier: $0
+
+Found Log: SMART Sense Data (Alternate Decoding #1)
+Log Code: $30
+Log Size: 128 bytes
+Parameter Code: $FFFF8001
+Parameter Value: Normalised: 100, Worst Ever: 100, Warranty Failure Threshold: 1
+Parameter Code: $FFFF8003
+Parameter Value: Normalised: 87, Worst Ever: 87, Warranty Failure Threshold: 1
+Parameter Code: $FFFF8004
+Parameter Value: Normalised: 98, Worst Ever: 98, Warranty Failure Threshold: 1
+Parameter Code: $FFFF8005
+Parameter Value: Normalised: 96, Worst Ever: 96, Warranty Failure Threshold: 1
+Parameter Code: $FFFF8007
+Parameter Value: Normalised: 100, Worst Ever: 100, Warranty Failure Threshold: 1
+Parameter Code: $FFFF8009
+Parameter Value: Normalised: 94, Worst Ever: 94, Warranty Failure Threshold: 1
+Parameter Code: $FFFF800B
+Parameter Value: Normalised: 100, Worst Ever: 100, Warranty Failure Threshold: 1
+Parameter Code: $FFFF800C
+Parameter Value: Normalised: 98, Worst Ever: 98, Warranty Failure Threshold: 1
+
+Found Log: Performance Counters (IBM)  (Alternate Decoding #2)
+Warning: Log format may be device specific. Info may be incorrect
+Reference: IBM DGHS09Z
+Log Code: $30
+Log Size: 128 bytes
+Zero Seeks: 25700
+Seeks (>=2/3) of disk: 256
+Seeks (>=1/3 AND <2/3) of disk: 0
+Seeks (>=1/6 AND <1/3) of disk: 0
+Seeks (>=1/12 AMD <1/6) of disk: 0
+Seeks (>0 and <1/12) of disk: 0
+Overrun Counter: 22359
+Underrun Counter: 256
+Device Cache Full Read Hits: 0
+Device Cache Partial Read Hits: 5000
+Device Cache Write Hits: -2147221492
+Device Cache Fast Writes: 1650589952
+
+
+@endnode
+
+@node "Serial #" "Serial #"
+
+                                 SERIAL NUMBER
+                                 =============
+
+Attempts to return the serial number of the hardware.
+
+@{i}@{b}Example Output@{ub}@{ui}:
+
+Page Code: $80
+Page Length: 12
+Serial Number: 153719010346
+
+
+@endnode
+
+@node "ATIP" "ATIP"
+
+                                      ATIP
+                                      ====
+
+The ATIP command is usually only supported by devices capable of burning
+CD-ROMs. Some CD-ROM drives support ATIP, but this is usually only the very
+modern drives. Q-Device! has very basic support for ATIP.
+
+@endnode
+
+@node "Known Bugs" "Known Bugs"
+
+                                  KNOWN BUGS
+                                  ==========
+                                  
+Q-Device is written in Amiga E, consequently the largest value it supports is a
+signed 32bit value (2,147,483,647). This means occassionally, albeit rare, you
+may see a negative number where one does not make sense. This may also cause
+another problem with huge capacity devices being reported as the wrong size, for
+example hard drives over 120GB. I'm currently unsure of the best way to work
+around this. 
+
+@endnode
+
+@node "History" "History"
+
+                                    HISTORY
+                                    =======
+Version 0.6
+-----------
+
+ADDED  : Preference option to use SCSIF_AUTOSENSE, for the automatic retrieval
+         of sense data. This option guarantees that sense data will not be lost
+         however some device drivers do not support it, so it is disabled by
+         default.
+
+ADDED  : Decoding for the following device parameter pages:
+          $1, Read/Write Error Recovery (Optical Devices)
+          $1, Read/Write Error Recovery (Write Once Devices)
+          $3, Measurement Units (Scanner Devices)
+          $3, Parallel Printer Interface (Printer Devices)
+          $4, Serial Printer Interface (Printer Devices)
+          $5, Printer Options (Printer Devices)
+          $6, Optical Memory (Optical Devices)
+          $6, Optical Memory (Write-Once Devices)
+          $7, Verify Error Recovery (Optical Devices)
+          $7, Verify Error Recovery (Sequential Devices)
+          $7, Verify Error Recovery (Write Once Devices)
+          $8, Cache (Write-Once Devices)
+          $B, Supported Media (Optical Devices)
+         $1D, Element Address Assignment (Medium Changer Devices)
+         $1E, Transport Geometry (Medium Changer Devices)
+         $1F, Medium Changer Device Capabilities (Medium Changer Devices)
+         $20, Format Parameters (Optical Devices) 
+         $21, Control Parameters (Optical Devices)
+         $2F, Spindown Timing (Direct Access Devices)        
+         
+ADDED  : Decoding for the following firmware logs:
+         $30, SMART Sense Data 
+         $30, Performance Counters (IBM)         
+         $35, Cache Utilisation (IBM)
+         $36, Temperature (IBM)
+         
+ADDED  : Recognition, but no decoding yet for the following firmware logs:   
+         $32, Physical Error Sites (IBM)
+         $33, LBA Error Sites (IBM)
+
+ADDED  : Significantly more fields to the already decodable device parameter
+         pages. Q-Device now supports every page and field specified in the
+         SCSI-2 draft. (In addition to many from other sources)  
+               
+ADDED  : Media recognition (if device supports it) to the device paramater
+         header, known types are:
+         Flexible disk, single-sided; unspecified medium
+         Flexible disk, double-sided; unspecified medium
+         Diameter: 8", Bit Dens.: 6, TPI: 48, Sides: 2
+         Diameter: 8", Bit Dens.: 6, TPI: 48, Sides: 1
+         Diameter: 8", Bit Dens.: 13, TPI: 48, Sides: 1
+         Diameter: 8", Bit Dens.: 13, TPI: 48, Sides: 2
+         Diameter: 5.25", Bit Dens.: 13, TPI: 48, Sides: 1
+         Diameter: 5.25", Bit Dens.: 7, TPI: 48, Sides: 2
+         Diameter: 5.25", Bit Dens.: 7, TPI: 96, Sides: 2
+         Diameter: 5.25", Bit Dens.: 13, TPI: 96, Sides: 2
+         Diameter: 3.5", Bit Dens.: 7, TPI: 135, Sides: 2
+         Width: 0.25", Tracks 12, FTPI: 10,000
+         Width: 0.25", Tracks 24, FTPI: 10,000
+         Optical Read Only Medium
+         Optical Write Once Medium
+         Optical Reversible/Erasable Medium
+         Combination Read Only/Write Once
+         Combination Read Only/Write Once/Reversible/Erasable
+         Combination Write Once/Reversible/Erasable
+         120 mm CD-ROM data only
+         120 mm CD-DA audio only
+         120 mm CD-ROM data and audio combined
+         80 mm CD-ROM data only
+         80 mm CD-DA audio only
+         80 mm CD-ROM data and audio combined
+
+ADDED  : Density recognition to the device parameter header, known types are:
+         Width: 0.5", Tracks: 9, Density: 32, Code: NRZI, Type: Reel
+         Width: 0.5", Tracks: 9, Density: 63, Code: PE, Type: Reel
+         Width: 0.5", Tracks: 9, Density: 246, Code: GCR, Type: Reel
+         Width: 0.25", Tracks: 4/9, Density: 315, Code: GCR, Type: Cartridge
+         Width: 0.5", Tracks: 9, Density: 126, Code: PE, Type: Reel
+         Width: 0.25", Tracks: 4, Density: 252, Code: IMFM, Type: Cartridge
+         Width: 0.15", Tracks: 4, Density: 315, Code: GCR, Type: Cassette
+         Width: 0.5", Tracks: 18, Density: 1491, Code: GCR, Type: Cartridge
+         Width: 0.5", Tracks: 22, Density: 262, Code: MFM, Type: Cartridge
+         Width: 0.25", Tracks: 4, Density: 63, Code: PE, Type: Cartridge
+         Width: 0.5", Tracks: 24, Density: 500, Code: GCR, Type: Cartridge
+         Width: 0.5", Tracks: 4, Density: 999, Code: GCR, Type: Cartridge
+         Width: 0.25", Tracks: 15, Density: 394, Code: GCR, Type: Cartridge
+         Width: 0.25", Tracks: 18, Density: 394, Code: GCR, Type: Cartridge
+         Width: 0.25", Tracks: 26, Density: 630, Code: GCR, Type: Cartridge
+         Width: 0.25", Tracks: 30, Density: 2034, Code: RLL, Type: Cartridge
+         Width: 0.15", Tracks: 1, Density: 2400, Code: DDS, Type: Cassette
+         Width: 0.315", Tracks: 1, Density: 1703, Code: RLL, Type: Cassette
+         Width: 0.315", Tracks: 1, Density: 1789, Code: RLL, Type: Cassette
+         Width: 0.5", Tracks: 48, Density: 394, Code: MFM, Type: Cartridge
+         Width: 0.5", Tracks: 48, Density: 1673, Code: MFM, Type: Cartridge
+         Diameter: 3.5", Type: Read/Write, Sector: 512/1024, Tracks: 12500, Sides: 1
+         Diameter: 3.5", Type: Read/Write, Sector: 512/1024, Tracks: 12500, Sides: 2
+         Diameter: 5.25", Type: Read/Write, Sector: 512/1024, Tracks: 18750, Sides: 2
+         Diameter: 5.25", Type: Write Once, Sector: 512/1024, Tracks: 30000, Sides: 2
+         Diameter: 5.25", Type: Write Once, Sector: 512/1024, Tracks: 20000, Sides: 2
+         Diameter: 5.25", Type: Write Once, Sector: 512/1024, Tracks: 18750, Sides: 2
+         Diameter: 8"
+         Diameter: 12", Sector: 1024, Sides: 2
+         Diameter: 14", Sector: 1024, Tracks: 56350, Sides: 2
+         User Data Only, Physical Sector: 2048
+         User and Auxiliary Data, Physical Sector: 2336
+         4 Byte Tag, User and Auxiliary Data, Physical Sector: 2340
+         Audio Only
+
+ADDED  : Show defects option. Supports primary, grown or both defects in block,
+         physical or bytes from index formats.  
+ 
+ADDED  : Rewind/Rezero button         
+                                                     
+ADDED  : Q-Device now supports information retrieval up to 64K, instead of 255
+         bytes  
+         
+ADDED  : Button to save the output to a text file                                          
+
+FIXED  : Changes made to host or port in the preferences window would still
+         remain after pressing cancel.
+
+FIXED  : Minor fixes to the following device parameter pages:
+         $8, Cache: Some labels should have been 'blocks' not 'bytes'
+         $C, Notch: Always reported boundary type as logical
+         $E, CDROM Audio Control: "Format of LBA/sec" field was wrong, used a
+             hex value when a binary value was intended.
+         
+FIXED  : Fixes to the following log pages:
+         $1, Buffer under/over runs: This was basically completely broken
+             before 
+                              
+CHANGED: Massive re-structure of the source code, no longer as monolithic
+         
+CHANGED: tcip-scsi.device has been temporarily disabled as it's in real need
+         of a re-write to fix some enforcer hits and to support the new
+         features.
+
+Version 0.5
+-----------
+
+ADDED  : tcpip-scsi.device. A psuedo (that is, not real) device for performing
+         queries on remote machines running the Q-Device! daemon. Q-Device!
+         daemon is only available for Linux and Solaris at the moment.
+
+ADDED  : Very basic support for ATIP
+
+ADDED  : Support for the following device parameter page:
+         $33, Extended Error Recovery (Direct Access Devices)
+         
+ADDED  : Decoding for the following firmware logs:
+         $1, Buffer Over-Run and Under-Run log
+         $D, Temperature Log
+         
+ADDED  : Recognition, but no decoding yet for the following firmware logs:
+          $8, Format Status
+          $9, Reserved to the MS59 standard
+          $A, Reserved to the MS59 standard
+          $B, Last number of deferred errors or asynchronous events
+          $C, Sequential Access Log
+          $E, Start Stop Cycle
+          $F, Application Client Log
+         $10, Self Test Results
+         $11, DTD Status Log
+         $12, Tape Alert Response
+         $13, Requested Recovery Log
+         $14, Device Statistics
+         $17, Non Volatile Cache
+         $18, Protocol Specific Port
+         $2E, TapeAlert Log
+         $2F, Information Exceptions
+         $37, Cache Statistics
+         $3E, Factory Log
+         
+FIXED  : The command block for scanning and displaying firmware logs was one
+         byte too short
+         
+FIXED  : Changed the page control field for scanning firmware logs to 01.
+         Scanning firmware logs is now compatible with more hardware.
+         
+CHANGED: There is no longer separate buttons for reading individual logs. This
+         has been replaced with a single button called "Show Firmware Logs"
+         
+CHANGED: A few of the device parameter pages marked as vendor specific before,
+         are now treated as standard due to ratification in later SCSI
+         standards.
+
+Version 0.4
+-----------
+
+ADDED  : Q-Device! is now able to return the product serial number if supported
+         by the SCSI target.
+         
+ADDED  : Increased verbosity on output. Shows page lengths, identifiers and
+         vendor pages as well as reserved pages for that device class.
+         
+ADDED  : Massively increased the number of decoded fields supported by
+         Q-Device! in the parameter pages it already recognises.
+         
+ADDED  : Decoding for the following device parameter pages:
+         13, Power Condition (Direct Access Devices)
+         15, Data Compression Characteristics (Sequential Access Devices)
+         17, Medium Partitions 1 (Sequential Access Devices)
+         18, Medium Partitions 2 (Sequential Access Devices)
+         19, Medium Partitions 3 (Sequential Access Devices)
+         20, Medium Partitions 4 (Sequential Access Devices)
+         24, Protocol Specific LUN (All Devices)
+         25, Protocol Specific (All Devices)
+         26, Power Control (All Devices)
+         28, SCSI SMART Control (All Devices)
+         42, CDROM Capabilties and Mechanical Status (CDROM Devices) 
+         57, Quantum Unique Driver Control (Direct Access Devices)
+
+ADDED  : Now automatically uses the MODE_SENSE_10 opcode, if your SCSI device
+         doesn't support the MODE_SENSE_6 opcode.
+         
+ADDED  : Q-Device! now has its own icon and appicon.
+
+FIXED  : Slight bug in the GB calculation for true capacity, caused by a
+         rounding error when doing a modulus. It would only occur under rare
+         circumstances, eg if your HD was 4091MB in size, it would report
+         3.10GB instead of 3.9GB
+         
+FIXED  : Incorrect structure size used for the block descriptor section of a
+         mode sense request (device parameters). Was 6 bytes when it should
+         have been 8.
+         
+FIXED  : Byte mis-alignment when reading the number of cylinders in Page type 4
+         of device parameters.
+         
+FIXED  : Byte mis-alignment when reading the landing cylinder in Page type 4 of
+         device parameters.
+         
+FIXED  : When setting preferences, if the user selected cancel then all the
+         gadgets were returned to the last saved settings.
+
+CHANGED: Probe button is now highlighted differently to other buttons.
+
+Thanks to Todd Oberly for copious amounts of beta testing!
+
+
+Version 0.3
+-----------
+
+ADDED  : The following device parameter pages:-
+         CD-ROM Parameters (for CDROM Devices)
+         Verify Error Recovery (for CD-ROM Devices)
+         Sequential Device Parameters (for Sequential Devices)
+         Error Recovery (for Sequential Devices).
+         Cache (for CDROM Devices and Optical Devices)
+         
+ADDED  : Preferences window
+
+ADDED  : Probe Devices Preference, you can choose the range of device units the
+         probe option will scan. Reverse scanning is also supported
+
+ADDED  : Menus which basically mirror the query, command and diagnostic buttons
+
+ADDED  : Q-Device! can now read the firmware logs. The following are supported:-
+         Scan Firmware Logs
+         Write Error Log
+         Read Error Log
+         Reverse Read Error Log
+         Verify Error Log
+         Non Medium Error Log
+
+FIXED  : Accidentally passing the simple test SCSI opcode when doing deep tests
+         Harmless, it just meant that deep mode was also performing simple
+         tests :-)
+         
+FIXED  : Hopefully anyway, a problem with bad drivers or devices not supporting
+         REQUEST SENSE causing a recursive loop of command not supported.
+         
+CHANGED: Default probe is now 0 - 15 instead of 0 - 7
+
+REMOVED: Request sense button. This was particularly useless because Q-Device!
+         automatically returns the sense data (error codes) upon a command
+         failure.
+
+         
+Version 0.2
+-----------
+
+ADDED  : Q-Device! can now instruct devices to perform a self diagnostic test.
+         Four diagnostic tests are supported.
+         
+ADDED  : Q-Device can now query many of the device parameter pages. The
+         supported pages are:-
+         Disconnection & Reconnection
+         Interface Mode
+         Control Mode
+         Error Recovery
+         Formatting
+         Rigid Disk Geometry
+         Flexible Disk Geometry,
+         Cache
+         Supported Media
+         Notch
+         CD-ROM Audio
+         Verify Error Recovery
+         
+ADDED  : Double clicking an appropriate entry in the listview will perform a
+         full inquiry on that device and automatically add the device and unit
+         number to the text-boxes.
+         
+ADDED  : Popup list for selecting the device driver.
+
+ADDED  : Popup list for selecting the device unit.
+
+CHANGED: Unit text box is now limited to numeric characters up to 999.
+
+CHANGED: The listview now requires less memory.
+
+
+Version 0.1
+-----------
+
+Initial Release
+
+@endnode
+
+@node "FAQ" "FAQ"
+
+                                      FAQ
+                                      ===
+
+1. I have a Cyberstorm PPC or Mk-III, Q-Device! doesn't see drives above ID 7?
+
+Q-Device's definition of unit number is that used my AmigaDOS. It often reflects
+your SCSI ID's but this case is an exception. To access these drive's in
+Q-Device, increase your probe range to 158, or for reference, here's the unit
+values you can use:
+
+ID 8: Unit = 88
+ID 9: Unit = 98
+ID 10: Unit = 108
+ID 11: Unit = 118
+ID 12: Unit = 128
+ID 13: Unit = 138
+ID 14: Unit = 148
+ID 15: Unit = 158
+
+@endnode
+
+@node "Contact" "Contact & Bug Reports"
+
+                                    CONTACT
+                                    =======
+
+For comments or bug reports, please send an E-Mail to:
+
+                ian.chapman@amiga-hardware.com
+
+@endnode
+
+@node "Daemon" "Daemon"
+
+                     tcpip-scsi.device and Q-Device! Daemon
+                     ======================================
+
+NOTE: TEMPORARILY DISABLED IN V0.6 PENDING A REWRITE
+
+Qdd is a small daemon which executes SCSI commands sent from Q-Device! on the
+machine it's running on and sends back the reply to Q-Device! for processing.
+Q-Device! communicates with qdd by using the pseudo device, tcpip-scsi.device.
+
+                    NOTE. THIS IS AN EXPERIMENTAL FEATURE!!!
+
+Qdd was largely developed to give me access to more SCSI devices for further
+development and testing of Q-Device!. Consequently it is not feature-full and
+will simply quit at the slightest hiccup. However it's been released as some
+may find it useful or interesting.
+
+Currently binary versions of qdd are supplied for Linux/X86 and Solaris/SPARC.
+
+The source code is also supplied in case you wish to compile it yourself, or
+produce binary versions for Linux and Solaris running on other processors. The
+source code can also be compiled on IRIX for Silicon Graphics, however the IRIX
+version is not even remotely stable yet.
+
+Please consult the supplied tar.gz archives for additional information on using
+and compiling qdd.
+
+@endnode
+
+@node "Preferences" "Preferences"
+
+                                  Preferences
+                                  ===========
+
+Probe Units
+-----------
+
+You can configure which units Q-Device! should scan when clicking on Probe. By
+default it's set to scan from 0 to 15. However if you have devices which have
+additional LUNs or have a wide SCSI bus, you may wish to increase this.
+
+
+Use SCSIF_AUTOSENSE
+-------------------
+
+Upon a SCSI command failure, Q-Device automatically sends a second SCSI command
+asking for sense data. However the device may have already cleared the sense
+data before Q-Device can ask for it. SCSIF_AUTOSENSE means that the sense data
+can be "chained" to the original SCSI command so that Q-Device doesn't
+explicitly have to ask for it. This guarantees the return of sense data.
+SCSIF_AUTOSENSE is disabled by default because not all drivers or devices
+support it.
+
+
+Host
+----
+
+This is the hostname or IP address of the machine running qdd which you wish to
+scan via tcpip-scsi.device.
+
+
+Base Port
+---------
+
+This is the initial port that qdd starts opening for each SCSI device it finds.
+Leave this at 8000 unless you have a specific reason to change it.
+
+@endnode
+
+@node "Save Output" "Save Output"
+
+                                  SAVE OUTPUT
+                                  ===========
+                                  
+This button saves the current contents of the output listview to a text file.
+You will be prompted where to save the file. If the file already exists then it
+will be appended to, otherwise a new file will be created.                                  
+
+@endnode
