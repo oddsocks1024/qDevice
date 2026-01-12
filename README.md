@@ -29,6 +29,11 @@ much of this information and presenting it to the user.
 Originally written under a custom licence, Q-Device! is now available under
 the GPL v2, which supercedes any previous licencing.
 
+## Requirements
+
+- MUI (Magic User Interface) version 3.8 or higher
+- MCC_BetterString custom class
+
 ## Misc
 
 - Initial Release: Circa 2003
