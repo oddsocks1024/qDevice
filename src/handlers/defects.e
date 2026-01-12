@@ -66,7 +66,7 @@ DEF param:PTR TO d_list_psf, x=0, str[255]:STRING
         outlist_i('\ebNumber of Defects:\en', reply.defectlistsize / 4, NIL)
         outlist(' ', ' ')
     
-        FOR x:=1 TO (reply.defectlistsize / 8)
+        FOR x:=1 TO (reply.defectlistsize / 4)
             StringF(str, 'Defective Block Address: \d ($\h)', Long(param), Long(param))
             outlist('\ebDefect Found:\en', str)
             param:=param + 4
