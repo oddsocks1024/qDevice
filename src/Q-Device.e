@@ -893,6 +893,7 @@ DEF sock, sain:PTR TO sockaddr_in, received=0, returncode=0, hst:PTR TO hostent,
 
     EXCEPT DO
         IF sock <> -1 THEN CloseSocket(sock)
+        IF sain THEN Dispose(sain)
         IF (socketbase) THEN CloseLibrary(socketbase)
         SELECT exception
             CASE ERR_NOBSD
