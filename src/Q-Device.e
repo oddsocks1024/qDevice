@@ -838,7 +838,7 @@ ENDPROC (scsiio.status AND %00111110), exception
 ** processing by the handler procedures
 */
 PROC netquery(device:PTR TO CHAR, unit, cmd:PTR TO cdb12, size, buffer) HANDLE
-DEF sock, sain:PTR TO sockaddr_in, received=0, returncode=0, hst:PTR TO hostent,
+DEF sock=-1, sain=NIL:PTR TO sockaddr_in, received=0, returncode=0, hst:PTR TO hostent,
     address:in_addr, saou:sockaddr_in, tv:timeval, readfds:fd_set
 
     IF (socketbase:=OpenLibrary('bsdsocket.library', NIL)) = NIL THEN Raise(ERR_NOBSD)
