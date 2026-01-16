@@ -98,10 +98,10 @@ DEF serial[100]:STRING, i=0, str[255]:STRING
             ENDFOR
         CASE $1 TO $7F
             outlist_i('\ebASCII Length:\en', Char(reply+4), NIL)
-            StrCopy(str, (reply+5), Char(reply+4))
+            StrCopy(str, (reply+5), Min(Char(reply+4), 255))
             outlist('\ebText:\en', str)
         CASE $80
-            StrCopy(serial, (reply+4), reply.length)
+            StrCopy(serial, (reply+4), Min(reply.length, 100))
             outlist('\ebSerial Number:\en', serial)
         CASE $81
             outlist('\ebOperating Definitions:\en', ' ')
